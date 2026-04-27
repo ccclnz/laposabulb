@@ -5,17 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LA POSA BULB</title>
   <style>
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: purple;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
       font-family: Arial, sans-serif;
     }
 
+    body {
+      background: radial-gradient(ellipse at bottom, #1b1340 0%, #0a0420 60%, #050010 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .stars {
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 120%;
+      height: 120%;
+      pointer-events: none;
+      will-change: transform;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .stars-far    { animation: drift 180s linear infinite; }
+    .stars-mid    { animation: drift 120s linear infinite reverse; }
+    .stars-near   { animation: drift  80s linear infinite; }
+
+    @keyframes drift {
+      from { background-position: 0 0; }
+      to   { background-position: 1000px 600px; }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.85; }
+      50%      { opacity: 0.35; }
+    }
+
+    .twinkle {
+      animation: twinkle 4s ease-in-out infinite;
+    }
+
     .container {
-      text-align: center; /* centra pulsante e testo */
+      position: relative;
+      z-index: 10;
+      text-align: center;
     }
 
     .btn {
@@ -24,10 +62,11 @@
       cursor: pointer;
       padding: 0;
       transition: transform 0.3s ease;
+      filter: drop-shadow(0 0 25px rgba(180, 140, 255, 0.45));
     }
 
     .btn img {
-      width: 400px;   /* puoi cambiare dimensione */
+      width: 400px;
       height: auto;
       display: block;
       margin: 0 auto;
@@ -40,20 +79,73 @@
     .caption {
       margin-top: 15px;
       font-size: 0.8rem;
-      color: black;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+      color: #e8e1ff;
+      text-shadow: 0 0 6px rgba(120, 90, 200, 0.7);
     }
   </style>
 </head>
 <body>
+  <div class="stars stars-far"  id="layer-far"></div>
+  <div class="stars stars-mid"  id="layer-mid"></div>
+  <div class="stars stars-near twinkle" id="layer-near"></div>
+
   <div class="container">
-    <!-- Pulsante con immagine -->
     <button class="btn">
       <img src="LOGO_LPB.png" alt="Pulsante PNG">
     </button>
-    <!-- Testo sotto -->
     <p class="caption">il pulsante ancora non funziona</p>
   </div>
+
+  <script>
+    function makeStars(count, maxRadius) {
+      const stars = [];
+      for (let i = 0; i < count; i++) {
+        const x = Math.floor(Math.random() * 1000);
+        const y = Math.floor(Math.random() * 1000);
+        const r = (Math.random() * maxRadius).toFixed(2);
+        const a = (0.5 + Math.random() * 0.5).toFixed(2);
+        stars.push(`radial-gradient(${r}px ${r}px at ${x}px ${y}px, rgba(255,255,255,${a}) 50%, transparent 100%)`);
+      }
+      return stars.join(', ');
+    }
+
+    const far  = document.getElementById('layer-far');
+    const mid  = document.getElementById('layer-mid');
+    const near = document.getElementById('layer-near');
+
+    far.style.background  = makeStars(160, 1.1) + ', transparent';
+    mid.style.background  = makeStars(90, 1.6)  + ', transparent';
+    near.style.background = makeStars(40, 2.2)  + ', transparent';
+
+    far.style.backgroundRepeat  = 'repeat';
+    mid.style.backgroundRepeat  = 'repeat';
+    near.style.backgroundRepeat = 'repeat';
+
+    far.style.backgroundSize  = '1000px 1000px';
+    mid.style.backgroundSize  = '1000px 1000px';
+    near.style.backgroundSize = '1000px 1000px';
+
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      const cx = window.innerWidth  / 2;
+      const cy = window.innerHeight / 2;
+      targetX = (e.clientX - cx) / cx;
+      targetY = (e.clientY - cy) / cy;
+    });
+
+    function animate() {
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+
+      far.style.transform  = `translate(${currentX *  8}px, ${currentY *  8}px)`;
+      mid.style.transform  = `translate(${currentX * 18}px, ${currentY * 18}px)`;
+      near.style.transform = `translate(${currentX * 32}px, ${currentY * 32}px)`;
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
 </body>
 </html>
-
